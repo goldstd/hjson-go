@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"runtime/debug"
 
-	"github.com/hjson/hjson-go/v4"
+	"github.com/goldstd/hjson-go"
 )
 
-// Can be set when building for example like this:
+// Version Can be set when building for example like this:
 // go build -ldflags "-X main.Version=v3.0"
 var Version string
 
@@ -26,9 +26,8 @@ func fixJSON(data []byte) []byte {
 }
 
 func main() {
-
 	flag.Usage = func() {
-		fmt.Println("usage: hjson-cli [OPTIONS] [INPUT]")
+		fmt.Println("usage: hjson [OPTIONS] [INPUT]")
 		fmt.Println("hjson can be used to convert JSON from/to Hjson.")
 		fmt.Println("")
 		fmt.Println("hjson will read the given JSON/Hjson input file or read from stdin.")
@@ -41,7 +40,7 @@ func main() {
 	var showJSON = flag.Bool("j", false, "Output as formatted JSON.")
 	var showCompact = flag.Bool("c", false, "Output as JSON.")
 
-	var indentBy = flag.String("indentBy", "  ", "The indent string.")
+	var indentBy = flag.String("indent", "  ", "The indent string.")
 	var bracesSameLine = flag.Bool("bracesSameLine", false, "Print braces on the same line.")
 	var omitRootBraces = flag.Bool("omitRootBraces", false, "Omit braces at the root.")
 	var quoteAlways = flag.Bool("quoteAlways", false, "Always quote string values.")
@@ -68,9 +67,9 @@ func main() {
 	var err error
 	var data []byte
 	if flag.NArg() == 1 {
-		data, err = ioutil.ReadFile(flag.Arg(0))
+		data, err = os.ReadFile(flag.Arg(0))
 	} else {
-		data, err = ioutil.ReadAll(os.Stdin)
+		data, err = io.ReadAll(os.Stdin)
 	}
 	if err != nil {
 		panic(err)

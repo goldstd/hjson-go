@@ -1,11 +1,5 @@
 # hjson-go
 
-[![Build Status](https://github.com/hjson/hjson-go/workflows/test/badge.svg)](https://github.com/hjson/hjson-go/actions)
-[![Go Pkg](https://img.shields.io/github/release/hjson/hjson-go.svg?style=flat-square&label=go-pkg)](https://github.com/hjson/hjson-go/releases)
-[![Go Report Card](https://goreportcard.com/badge/github.com/hjson/hjson-go?style=flat-square)](https://goreportcard.com/report/github.com/hjson/hjson-go)
-[![coverage](https://img.shields.io/badge/coverage-ok-brightgreen.svg?style=flat-square)](https://gocover.io/github.com/hjson/hjson-go/)
-[![godoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/hjson/hjson-go/v4)
-
 ![Hjson Intro](https://hjson.github.io/hjson1.gif)
 
 ```
@@ -29,25 +23,25 @@
 
 The Go implementation of Hjson is based on [hjson-js](https://github.com/hjson/hjson-js). For other platforms see [hjson.github.io](https://hjson.github.io).
 
-More documentation can be found at https://pkg.go.dev/github.com/hjson/hjson-go/v4
+More documentation can be found at https://pkg.go.dev/github.com/goldstd/hjson-go
 
 # Install
 
-Instructions for installing a pre-built **hjson-cli** tool can be found at https://hjson.github.io/users-bin.html
+Instructions for installing a pre-built **hjson** tool can be found at https://hjson.github.io/users-bin.html
 
 If you instead want to build locally, make sure you have a working Go environment. See the [install instructions](https://golang.org/doc/install.html).
 
 - In order to use Hjson from your own Go source code, just add an import line like the one here below. Before building your project, run `go mod tidy` in order to download the Hjson source files. The suffix `/v4` is required in the import path, unless you specifically want to use an older major version.
 ```go
-import "github.com/hjson/hjson-go/v4"
+import "github.com/goldstd/hjson-go"
 ```
-- If you instead want to use the **hjson-cli** command line tool, run the command here below in your terminal. The executable will be installed into your `go/bin` folder, make sure that folder is included in your `PATH` environment variable.
+- If you instead want to use the **hjson** command line tool, run the command here below in your terminal. The executable will be installed into your `go/bin` folder, make sure that folder is included in your `PATH` environment variable.
 ```bash
-go install github.com/hjson/hjson-go/v4/hjson-cli@latest
+go install github.com/goldstd/hjson-go/hjson@latest
 ```
 # Usage as command line tool
 ```
-usage: hjson-cli [OPTIONS] [INPUT]
+usage: hjson [OPTIONS] [INPUT]
 hjson can be used to convert JSON from/to Hjson.
 
 hjson will read the given JSON/Hjson input file or read from stdin.
@@ -71,8 +65,8 @@ Options:
 ```
 
 Sample:
-- run `hjson-cli test.json > test.hjson` to convert to Hjson
-- run `hjson-cli -j test.hjson > test.json` to convert to JSON
+- run `hjson test.json > test.hjson` to convert to Hjson
+- run `hjson -j test.hjson > test.json` to convert to JSON
 
 # Usage as a GO library
 
@@ -81,7 +75,7 @@ Sample:
 package main
 
 import (
-    "github.com/hjson/hjson-go/v4"
+    "github.com/goldstd/hjson-go"
     "fmt"
 )
 
@@ -142,7 +136,7 @@ If you prefer, you can also unmarshal to Go structs (including structs implement
 package main
 
 import (
-    "github.com/hjson/hjson-go/v4"
+    "github.com/goldstd/hjson-go"
     "fmt"
 )
 
@@ -193,7 +187,7 @@ By using key `comment` in struct field tags you can specify comments to be writt
 package main
 
 import (
-    "github.com/hjson/hjson-go/v4"
+    "github.com/goldstd/hjson-go"
     "fmt"
 )
 
@@ -256,7 +250,7 @@ package main
 import (
     "fmt"
 
-    "github.com/hjson/hjson-go/v4"
+    "github.com/goldstd/hjson-go"
 )
 
 func main() {
@@ -324,7 +318,7 @@ The ambiguity can be avoided by using typed destinations when unmarshalling. A s
 package main
 
 import (
-    "github.com/hjson/hjson-go/v4"
+    "github.com/goldstd/hjson-go"
     "fmt"
 )
 
@@ -366,7 +360,7 @@ func (o *OrderedMap[T]) ElemType() reflect.Type {
 
 # API
 
-[![godoc](https://godoc.org/github.com/hjson/hjson-go/v4?status.svg)](https://godoc.org/github.com/hjson/hjson-go/v4)
+[![godoc](https://godoc.org/github.com/goldstd/hjson-go?status.svg)](https://godoc.org/github.com/goldstd/hjson-go)
 
 # History
 

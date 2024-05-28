@@ -1,3 +1,3 @@
-module github.com/hjson/hjson-go/v4
+module github.com/goldstd/hjson-go
 
-go 1.11
+go 1.22

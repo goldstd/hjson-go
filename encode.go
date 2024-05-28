@@ -72,46 +72,18 @@ type hjsonEncoder struct {
 
 var JSONNumberType = reflect.TypeOf(json.Number(""))
 
-var needsEscape, needsQuotes, needsEscapeML, startsWithKeyword, needsEscapeName *regexp.Regexp
+var (
 
-func init() {
-	var commonRange = `\x7f-\x9f\x{00ad}\x{0600}-\x{0604}\x{070f}\x{17b4}\x{17b5}\x{200c}-\x{200f}\x{2028}-\x{202f}\x{2060}-\x{206f}\x{feff}\x{fff0}-\x{ffff}`
-	// needsEscape tests if the string can be written without escapes
-	needsEscape = regexp.MustCompile(`[\\\"\x00-\x1f` + commonRange + `]`)
 	// needsQuotes tests if the string can be written as a quoteless string (includes needsEscape but without \\ and \")
-	needsQuotes = regexp.MustCompile(`^\s|^"|^'|^#|^/\*|^//|^\{|^\}|^\[|^\]|^:|^,|\s$|[\x00-\x1f\x7f-\x9f\x{00ad}\x{0600}-\x{0604}\x{070f}\x{17b4}\x{17b5}\x{200c}-\x{200f}\x{2028}-\x{202f}\x{2060}-\x{206f}\x{feff}\x{fff0}-\x{ffff}]`)
+	needsQuotes = regexp.MustCompile(`^\s|^"|^'|^#|^/\*|^//|^\{|^}|^\[|^]|^:|^,|\s$|[\x00-\x1f\x7f-\x9f\x{00ad}\x{0600}-\x{0604}\x{070f}\x{17b4}\x{17b5}\x{200c}-\x{200f}\x{2028}-\x{202f}\x{2060}-\x{206f}\x{feff}\x{fff0}-\x{ffff}]`)
 	// needsEscapeML tests if the string can be written as a multiline string (like needsEscape but without \n, \\, \", \t)
 	needsEscapeML = regexp.MustCompile(`'''|^[\s]+$|[\x00-\x08\x0b-\x1f` + commonRange + `]`)
 	// starts with a keyword and optionally is followed by a comment
-	startsWithKeyword = regexp.MustCompile(`^(true|false|null)\s*((,|\]|\}|#|//|/\*).*)?$`)
-	needsEscapeName = regexp.MustCompile(`[,\{\[\}\]\s:#"']|//|/\*`)
-}
-
-var meta = map[byte][]byte{
-	// table of character substitutions
-	'\b': []byte("\\b"),
-	'\t': []byte("\\t"),
-	'\n': []byte("\\n"),
-	'\f': []byte("\\f"),
-	'\r': []byte("\\r"),
-	'"':  []byte("\\\""),
-	'\\': []byte("\\\\"),
-}
-
-func (e *hjsonEncoder) quoteReplace(text string) string {
-	return string(needsEscape.ReplaceAllFunc([]byte(text), func(a []byte) []byte {
-		c := meta[a[0]]
-		if c != nil {
-			return c
-		}
-		r, _ := utf8.DecodeRune(a)
-		return []byte(fmt.Sprintf("\\u%04x", r))
-	}))
-}
+	startsWithKeyword = regexp.MustCompile(`^(true|false|null)\s*((,|]|}|#|//|/\*).*)?$`)
+)
 
 func (e *hjsonEncoder) quoteForComment(cmStr string) bool {
-	chars := []rune(cmStr)
-	for _, r := range chars {
+	for _, r := range cmStr {
 		switch r {
 		case '\r', '\n':
 			return false
@@ -123,7 +95,7 @@ func (e *hjsonEncoder) quoteForComment(cmStr string) bool {
 	return false
 }
 
-func (e *hjsonEncoder) quote(value string, separator string, isRootObject bool,
+func (e *hjsonEncoder) quote(value, separator string, isRootObject bool,
 	keyComment string, hasCommentAfter bool) {
 
 	// Check if we can insert this string without quotes
@@ -148,7 +120,7 @@ func (e *hjsonEncoder) quote(value string, separator string, isRootObject bool,
 		} else if !needsEscapeML.MatchString(value) && !isRootObject {
 			e.mlString(value, separator, keyComment)
 		} else {
-			e.WriteString(separator + `"` + e.quoteReplace(value) + `"`)
+			e.WriteString(separator + `"` + quoteReplace(value) + `"`)
 		}
 	} else {
 		// return without quotes
@@ -183,7 +155,52 @@ func (e *hjsonEncoder) mlString(value string, separator string, keyComment strin
 	e.WriteString("'''")
 }
 
-func (e *hjsonEncoder) quoteName(name string) string {
+func QuoteNameLeniently(name string) string {
+	if len(name) == 0 {
+		return `""`
+	}
+
+	// Check if we can insert this name without quotes
+	if needsEscapeName.MatchString(name) || needsEscape.MatchString(name) {
+		return `"` + quoteReplace(name) + `"`
+	}
+
+	// without quotes
+	return name
+}
+
+const commonRange = `\x7f-\x9f\x{00ad}\x{0600}-\x{0604}\x{070f}\x{17b4}\x{17b5}\x{200c}-\x{200f}\x{2028}-\x{202f}\x{2060}-\x{206f}\x{feff}\x{fff0}-\x{ffff}`
+
+var (
+	needsEscapeName = regexp.MustCompile(`[,{\[}\]\s:#"']|//|/\*`)
+
+	// needsEscape tests if the string can be written without escapes
+	needsEscape = regexp.MustCompile(`[\\\"\x00-\x1f` + commonRange + `]`)
+)
+
+var meta = map[byte][]byte{
+	// table of character substitutions
+	'\b': []byte(`\b`),
+	'\t': []byte(`\t`),
+	'\n': []byte(`\n`),
+	'\f': []byte(`\f`),
+	'\r': []byte(`\r`),
+	'"':  []byte(`\"`),
+	'\\': []byte(`\\`),
+}
+
+func quoteReplace(text string) string {
+	return string(needsEscape.ReplaceAllFunc([]byte(text), func(a []byte) []byte {
+		c := meta[a[0]]
+		if c != nil {
+			return c
+		}
+		r, _ := utf8.DecodeRune(a)
+		return []byte(fmt.Sprintf("\\u%04x", r))
+	}))
+}
+
+func quoteName(name string) string {
 	if len(name) == 0 {
 		return `""`
 	}
@@ -191,8 +208,9 @@ func (e *hjsonEncoder) quoteName(name string) string {
 	// Check if we can insert this name without quotes
 
 	if needsEscapeName.MatchString(name) || needsEscape.MatchString(name) {
-		return `"` + e.quoteReplace(name) + `"`
+		return `"` + quoteReplace(name) + `"`
 	}
+
 	// without quotes
 	return name
 }
@@ -285,8 +303,7 @@ func (e *hjsonEncoder) str(
 	value reflect.Value,
 	noIndent bool,
 	separator string,
-	isRootObject,
-	isObjElement bool,
+	isRootObject, isObjElement bool,
 	cm Comments,
 ) error {
 
@@ -343,7 +360,7 @@ func (e *hjsonEncoder) str(
 				name:  key,
 			})
 		}
-		return e.writeFields(fis, noIndent, separator, isRootObject, isObjElement, cm)
+		return e.writeFields(fis, separator, isRootObject, isObjElement, cm)
 	}
 
 	if value.Type().Implements(marshalerJSON) {
@@ -474,7 +491,7 @@ func (e *hjsonEncoder) str(
 				name:  name,
 			})
 		}
-		return e.writeFields(fis, noIndent, separator, isRootObject, isObjElement, cm)
+		return e.writeFields(fis, separator, isRootObject, isObjElement, cm)
 
 	case reflect.Struct:
 		// Struct field info is identical for all instances of the same type.
@@ -516,7 +533,7 @@ func (e *hjsonEncoder) str(
 			}
 			fis = append(fis, fi)
 		}
-		return e.writeFields(fis, noIndent, separator, isRootObject, isObjElement, cm)
+		return e.writeFields(fis, separator, isRootObject, isObjElement, cm)
 
 	default:
 		return errors.New("Unsupported type " + value.Type().String())

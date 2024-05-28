@@ -85,7 +85,7 @@ func getStructFieldInfo(rootType reflect.Type) []structFieldInfo {
 		indexPath []int
 	}
 	var sfis []structFieldInfo
-	structsToInvestigate := []structInfo{structInfo{typ: rootType}}
+	structsToInvestigate := []structInfo{{typ: rootType}}
 	// Struct types already visited at an earlier depth.
 	visited := map[reflect.Type]bool{}
 	// Count the number of specific struct types on a specific depth.
@@ -250,14 +250,7 @@ func getStructFieldInfoMap(rootType reflect.Type) structFieldMap {
 	return out
 }
 
-func (e *hjsonEncoder) writeFields(
-	fis []fieldInfo,
-	noIndent bool,
-	separator string,
-	isRootObject bool,
-	isObjElement bool,
-	cm Comments,
-) error {
+func (e *hjsonEncoder) writeFields(fis []fieldInfo, separator string, isRootObject, isObjElement bool, cm Comments) error {
 	indent1 := e.indent
 	if !isRootObject || e.EmitRootBraces || len(fis) == 0 {
 		e.bracesIndent(isObjElement, len(fis) == 0, cm, separator)
@@ -307,7 +300,7 @@ func (e *hjsonEncoder) writeFields(
 		} else {
 			e.WriteString(elemCm.Before)
 		}
-		e.WriteString(e.quoteName(fi.name))
+		e.WriteString(quoteName(fi.name))
 		e.WriteString(":")
 		e.WriteString(elemCm.Key)
 

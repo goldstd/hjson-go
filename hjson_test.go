@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
@@ -23,7 +22,7 @@ func fixEOL(data []byte) []byte {
 }
 
 func getContent(file string) []byte {
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		panic(err)
 	}
@@ -281,7 +280,7 @@ type testOrderedMapA struct {
 func (c *testOrderedMapA) UnmarshalJSON(in []byte) error {
 	c.OrderedMap = NewOrderedMap()
 	index := 0
-	for true {
+	for {
 		i1 := bytes.IndexByte(in[index:], '"')
 		if i1 < 0 {
 			break
@@ -330,7 +329,7 @@ type testOrderedMapB struct {
 func (c *testOrderedMapB) UnmarshalJSON(in []byte) error {
 	c.OrderedMap = NewOrderedMap()
 	index := 0
-	for true {
+	for {
 		i1 := bytes.IndexByte(in[index:], '"')
 		if i1 < 0 {
 			break
@@ -519,14 +518,14 @@ func TestUnmarshalSliceMapElemType(t *testing.T) {
 	}
 	// Make sure that all values are strings (because of testOrderedMap.ElemType()).
 	expectedA := []testOrderedMapA{
-		testOrderedMapA{
+		{
 			NewOrderedMapFromSlice([]KeyValue{
 				{"B", "first"},
 				{"A", "2"},
 				{"C", "third"},
 			}),
 		},
-		testOrderedMapA{
+		{
 			NewOrderedMapFromSlice([]KeyValue{
 				{"D", "3"},
 			}),
@@ -553,14 +552,14 @@ func TestUnmarshalSliceMapElemType(t *testing.T) {
 	}
 	// Make sure that all values are strings (because of testOrderedMap.ElemType()).
 	expectedB := []testOrderedMapB{
-		testOrderedMapB{
+		{
 			NewOrderedMapFromSlice([]KeyValue{
 				{"B", "first"},
 				{"A", "2"},
 				{"C", "third"},
 			}),
 		},
-		testOrderedMapB{
+		{
 			NewOrderedMapFromSlice([]KeyValue{
 				{"D", "3"},
 			}),
@@ -599,14 +598,14 @@ func TestUnmarshalSliceMapPointerElemType(t *testing.T) {
 	}
 	// Make sure that all values are strings (because of testOrderedMap.ElemType()).
 	expectedA := []*testOrderedMapA{
-		&testOrderedMapA{
+		{
 			NewOrderedMapFromSlice([]KeyValue{
 				{"B", "first"},
 				{"A", "2"},
 				{"C", "third"},
 			}),
 		},
-		&testOrderedMapA{
+		{
 			NewOrderedMapFromSlice([]KeyValue{
 				{"D", "3"},
 			}),
@@ -913,7 +912,7 @@ func TestUnmarshalSliceSliceElemType(t *testing.T) {
 	}
 	// Make sure that all values are strings (because of testSliceElemTyper.ElemType()).
 	expectedA := []testSliceElemTyperA{
-		testSliceElemTyperA{
+		{
 			"1",
 			"two",
 		},
@@ -939,7 +938,7 @@ func TestUnmarshalSliceSliceElemType(t *testing.T) {
 	}
 	// Make sure that all values are strings (because of testOrderedMap.ElemType()).
 	expectedB := []testSliceElemTyperB{
-		testSliceElemTyperB{
+		{
 			"1",
 			"two",
 		},
@@ -1000,7 +999,7 @@ func TestUnmarshalSlicePointerSliceElemType(t *testing.T) {
 	}
 	// Make sure that all values are strings (because of testOrderedMap.ElemType()).
 	expectedB := []*testSliceElemTyperB{
-		&testSliceElemTyperB{
+		{
 			"1",
 			"two",
 		},
@@ -1695,8 +1694,6 @@ func (c *itsJ) UnmarshalText(text []byte) error {
 func (c itsJ) MarshalJSON() ([]byte, error) {
 	return []byte("{\"anon\": \"" + strings.Replace(c.anon, "\"", "\\\"", -1) + "\"}"), nil
 }
-
-type itsK *itsJ
 
 type itsL int
 

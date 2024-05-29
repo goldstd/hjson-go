@@ -36,16 +36,20 @@ func main() {
 		flag.PrintDefaults()
 	}
 
-	var help = flag.Bool("h", false, "Show this screen.")
-	var showJSON = flag.Bool("j", false, "Output as formatted JSON.")
-	var showCompact = flag.Bool("c", false, "Output as JSON.")
+	var (
+		help        = flag.Bool("h", false, "Show this screen.")
+		showJSON    = flag.Bool("j", false, "Output as formatted JSON.")
+		showCompact = flag.Bool("c", false, "Output as JSON.")
 
-	var indentBy = flag.String("indent", "  ", "The indent string.")
-	var bracesSameLine = flag.Bool("bracesSameLine", false, "Print braces on the same line.")
-	var omitRootBraces = flag.Bool("omitRootBraces", false, "Omit braces at the root.")
-	var quoteAlways = flag.Bool("quoteAlways", false, "Always quote string values.")
-	var showVersion = flag.Bool("v", false, "Show version.")
-	var preserveKeyOrder = flag.Bool("preserveKeyOrder", false, "Preserve key order in objects/maps.")
+		indentBy = flag.String("indent", "  ", "The indent string.")
+		eol      = flag.String("eol", "\n", `End of line, should be either \n or \r\n`)
+
+		bracesSameLine   = flag.Bool("bracesSameLine", false, "Print braces on the same line.")
+		omitRootBraces   = flag.Bool("omitRootBraces", false, "Omit braces at the root.")
+		quoteAlways      = flag.Bool("quoteAlways", false, "Always quote string values.")
+		showVersion      = flag.Bool("v", false, "Show version.")
+		preserveKeyOrder = flag.Bool("preserveKeyOrder", false, "Preserve key order in objects/maps.")
+	)
 
 	flag.Parse()
 	if *help || flag.NArg() > 1 {
@@ -108,6 +112,7 @@ func main() {
 		opt.EmitRootBraces = !*omitRootBraces
 		opt.QuoteAlways = *quoteAlways
 		opt.Comments = false
+		opt.Eol = *eol
 		out, err = hjson.MarshalWithOptions(value, opt)
 		if err != nil {
 			panic(err)

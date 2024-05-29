@@ -39,6 +39,7 @@ import "github.com/goldstd/hjson-go"
 ```bash
 go install github.com/goldstd/hjson-go/hjson@latest
 ```
+
 # Usage as command line tool
 ```
 usage: hjson [OPTIONS] [INPUT]
@@ -48,20 +49,26 @@ hjson will read the given JSON/Hjson input file or read from stdin.
 
 Options:
   -bracesSameLine
-      Print braces on the same line.
-  -c  Output as JSON.
-  -h  Show this screen.
-  -indentBy string
-      The indent string. (default "  ")
-  -j  Output as formatted JSON.
+        Print braces on the same line.
+  -c    Output as JSON.
+  -eof string
+        End of line, should be either \n or \r\n (default "\n")
+  -h    Show this screen.
+  -indent string
+        The indent string. (default "  ")
+  -j    Output as formatted JSON.
   -omitRootBraces
-      Omit braces at the root.
+        Omit braces at the root.
   -preserveKeyOrder
-      Preserve key order in objects/maps.
+        Preserve key order in objects/maps.
   -quoteAlways
-      Always quote string values.
-  -v
-      Show version.
+        Always quote string values.
+  -v    Show version.
+```
+
+```sh
+$ jj -gu a=@姓名 'b=@汉字(3)' c=@性别 d=@地址 | hjson -eof ', ' -omitRootBraces
+a: 许鑀邩, b: 皿鐘獢, c: 男, d: 四川省遂宁市邚軫路7364号勳鐆小区8单元2202室
 ```
 
 Sample:
